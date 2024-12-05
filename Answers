@@ -1,0 +1,58 @@
+1. How many DaemonSets are created in the cluster in all namespaces?
+    kubectl get daemonsets --all-namespaces
+2. What DaemonSets exist in the kube-system namespace?
+    kubectl get daemonsets -n kube-system
+3. What is the image used by the POD deployed by the kube-proxy DaemonSet?
+  kubectl describe daemonset kube-proxy -n kube-system
+4. Deploy a DaemonSet for FluentD Logging using the given specifications.:
+  Create a YAML file, fluentd-daemonset.yaml:
+  apiVersion: apps/v1
+  kind: DaemonSet
+  metadata:
+    name: elasticsearch
+    namespace: kube-system
+  spec:
+    selector:
+      matchLabels:
+        name: fluentd
+    template:
+      metadata:
+        labels:
+          name: fluentd
+      spec:
+        containers:
+        - name: fluentd
+          image: k8s.gcr.io/fluentd-elasticsearch:1.20
+  Apply it:kubectl apply -f fluentd-daemonset.yaml
+5. Deploy a pod named nginx-pod using the nginx:alpine image with the labels set to tier=backend.:
+  kubectl run nginx-pod --image=nginx:alpine --labels=tier=backend
+6. Deploy a test pod using the nginx:alpine image.:
+  kubectl run test-pod --image=nginx:alpine
+7. Create a service backend-service to expose the backend application within the cluster on port 80.:
+  Create a YAML file, backend-service.yaml:  
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: backend-service
+    spec:
+      selector:
+        tier: backend
+      ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 80
+      type: ClusterIP
+  Apply it: kubectl apply -f backend-service.yaml
+8. Curl the backend-service from the test pod. What is the response?:
+  kubectl exec test-pod -- curl backend-service
+9. Create a deployment named web-app using the nginx image with 2 replicas.
+  kubectl create deployment web-app --image=nginx --replicas=2
+10. Expose the web-app as a service web-app-service on port 80 and nodePort 30082.: 
+  kubectl expose deployment web-app --type=NodePort --name=web-app-service --port=80 --target-port=80 --node-port=30082
+11. Access the web app from the node.:Use the node's IP address and the NodePort: curl http://<Node-IP>:30082
+12. How many static pods exist in this cluster in all namespaces?:
+  kubectl get pods --all-namespaces --field-selector spec.nodeName!=<node-name>
+13. On which nodes are the static pods currently created? 
+  kubectl get pods --all-namespaces -o wide
+
+
